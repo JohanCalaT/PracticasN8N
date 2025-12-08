@@ -9,3 +9,28 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Augment
+.augment/
+
+# LaTeX archivos temporales (mantener solo .tex y .pdf)
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+*.nav
+*.snm
+*.vrb
+
+# Ignorar .tex pero NO .pdf
+**/informe/*.tex
+
+# Volúmenes de Docker
+postgres_data/
+error_logs/

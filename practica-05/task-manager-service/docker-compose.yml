@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # ========================================
+  # Servicio de la API Web (Flask)
+  # ========================================
+  web:
+    build: ./web
+    container_name: task-manager-web
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./web:/app
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/taskdb
+      - RABBITMQ_URL=amqp://guest:guest@mq:5672/%2F
+    depends_on:
+      - db
+      - mq
+    restart: unless-stopped
+
+  # ========================================
+  # Servicio del Trabajador Asíncrono
+  # ========================================
+  worker:
+    build: ./worker
+    container_name: task-manager-worker
+    volumes:
+      - ./worker:/app
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@mq:5672/%2F
+    depends_on:
+      - mq
+    restart: unless-stopped
+
+  # ========================================
+  # Servicio de Notificaciones (Ejercicio 2)
+  # ========================================
+  notifier:
+    build: ./notifier
+    container_name: task-manager-notifier
+    volumes:
+      - ./notifier:/app
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@mq:5672/%2F
+      - WEBHOOK_URL=https://webhook.site/your-unique-url
+    depends_on:
+      - mq
+    restart: unless-stopped
+
+  # ========================================
+  # EJERCICIO 3: Error Handler (DLQ)
+  # ========================================
+  error-handler:
+    build: ./error-handler
+    container_name: task-manager-error-handler
+    volumes:
+      - ./error-handler:/app
+      - error_logs:/app/logs
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@mq:5672/%2F
+    depends_on:
+      - mq
+    restart: unless-stopped
+
+  # ========================================
+  # Servicio de la Base de Datos (PostgreSQL)
+  # ========================================
+  db:
+    image: postgres:14-alpine
+    container_name: task-manager-db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=taskdb
+    ports:
+      - "5433:5432"
+    restart: unless-stopped
+
+  # ========================================
+  # Servicio del Bróker de Mensajes (RabbitMQ)
+  # ========================================
+  mq:
+    image: rabbitmq:3-management-alpine
+    container_name: task-manager-mq
+    ports:
+      - "5672:5672"   # Puerto AMQP
+      - "15672:15672" # Puerto Management UI
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  error_logs:
