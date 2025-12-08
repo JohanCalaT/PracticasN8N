@@ -1,0 +1,389 @@
+{
+  "name": "Practica 03 - Ejercicio 2: Clasificacion de Productos por Valoracion",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "97544bcd-5d2d-47ac-bd73-dab13a4afa31",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -816,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/products",
+        "options": {}
+      },
+      "id": "71894532-3d18-4774-b2bd-68ec8297afad",
+      "name": "HTTP Request - Obtener Productos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -528,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ $json.rating.rate >= 4.5 ? 0 : ($json.rating.rate >= 3.5 ? 1 : 2) }}"
+      },
+      "id": "2ae3555c-1b26-42d6-9aaa-47a6d26561b9",
+      "name": "Switch - Clasificar por Valoracion",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1wMyROsDVmU-RZHNRDS-jqCWuc-tSXupdzhwhpIuyvpc",
+          "mode": "list",
+          "cachedResultName": "Análisis de Valoraciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wMyROsDVmU-RZHNRDS-jqCWuc-tSXupdzhwhpIuyvpc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Top",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wMyROsDVmU-RZHNRDS-jqCWuc-tSXupdzhwhpIuyvpc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $json.id }}",
+            "Titulo": "={{ $json.title }}",
+            "Precio": "={{ $json.price }}",
+            "Valoracion": "={{ $json.rating.rate }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Titulo",
+              "displayName": "Titulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Precio",
+              "displayName": "Precio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Valoracion",
+              "displayName": "Valoracion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d11aa1e7-7755-4739-8a8c-781477ca1cb6",
+      "name": "Google Sheets - Top",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bLicu88mofcsnSNT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1wMyROsDVmU-RZHNRDS-jqCWuc-tSXupdzhwhpIuyvpc",
+          "mode": "list",
+          "cachedResultName": "Análisis de Valoraciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wMyROsDVmU-RZHNRDS-jqCWuc-tSXupdzhwhpIuyvpc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1724158648,
+          "mode": "list",
+          "cachedResultName": "Bueno",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wMyROsDVmU-RZHNRDS-jqCWuc-tSXupdzhwhpIuyvpc/edit#gid=1724158648"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Titulo": "={{ $json.title }}",
+            "Precio": "={{ $json.price }}",
+            "Valoracion": "={{ $json.rating.rate }}",
+            "ID": "={{ $json.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Titulo",
+              "displayName": "Titulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Precio",
+              "displayName": "Precio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Valoracion",
+              "displayName": "Valoracion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7a229c01-1a71-48c5-b5cd-52294f774803",
+      "name": "Google Sheets - Bueno",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        208
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bLicu88mofcsnSNT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1wMyROsDVmU-RZHNRDS-jqCWuc-tSXupdzhwhpIuyvpc",
+          "mode": "list",
+          "cachedResultName": "Análisis de Valoraciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wMyROsDVmU-RZHNRDS-jqCWuc-tSXupdzhwhpIuyvpc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1528804086,
+          "mode": "list",
+          "cachedResultName": "Regular",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wMyROsDVmU-RZHNRDS-jqCWuc-tSXupdzhwhpIuyvpc/edit#gid=1528804086"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $json.id }}",
+            "Titulo": "={{ $json.title }}",
+            "Precio": "={{ $json.price }}",
+            "Valoracion": "={{ $json.rating.rate }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Titulo",
+              "displayName": "Titulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Precio",
+              "displayName": "Precio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Valoracion",
+              "displayName": "Valoracion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "1c962f88-d154-4994-8681-716dc07570f4",
+      "name": "Google Sheets - Regular",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        416
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bLicu88mofcsnSNT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "ad4c838c-303d-4fed-bd01-5570772a85f2",
+      "name": "Merge - Consolidar Resultados",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        208
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Obtener Productos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - Obtener Productos": {
+      "main": [
+        [
+          {
+            "node": "Switch - Clasificar por Valoracion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch - Clasificar por Valoracion": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - Top",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets - Bueno",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets - Regular",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets - Top": {
+      "main": [
+        [
+          {
+            "node": "Merge - Consolidar Resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets - Bueno": {
+      "main": [
+        [
+          {
+            "node": "Merge - Consolidar Resultados",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a7a1ebce-1b31-4ff7-bd7c-b67b9abc1f50",
+  "meta": {
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "xdSczGVoNqQI00az",
+  "tags": []
+}

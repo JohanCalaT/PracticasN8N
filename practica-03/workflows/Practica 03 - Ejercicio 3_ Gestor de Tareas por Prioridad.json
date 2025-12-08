@@ -1,0 +1,261 @@
+{
+  "name": "Practica 03 - Ejercicio 3: Gestor de Tareas por Prioridad",
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [{ "field": "minutes", "minutesInterval": 5 }] } },
+      "id": "ej3-schedule",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-800, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generar 5 tareas con priority y type aleatorios\nconst priorities = ['Alta', 'Media', 'Baja'];\nconst types = ['Tecnico', 'Marketing', 'Administrativo'];\n\nconst tareas = [];\nfor (let i = 0; i < 5; i++) {\n  tareas.push({\n    json: {\n      tarea_id: i + 1,\n      priority: priorities[Math.floor(Math.random() * 3)],\n      type: types[Math.floor(Math.random() * 3)]\n    }\n  });\n}\n\nreturn tareas;"
+      },
+      "id": "ej3-code",
+      "name": "Code - Generar 5 Tareas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-580, 300]
+    },
+    {
+      "parameters": { "url": "https://bored-api.appbrewery.com/random", "options": {} },
+      "id": "ej3-http",
+      "name": "HTTP Request - Bored API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-360, 300]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            { "id": "a1", "name": "activity", "value": "={{ $json.activity }}", "type": "string" },
+            { "id": "a2", "name": "priority", "value": "={{ $('Code - Generar 5 Tareas').item.json.priority }}", "type": "string" },
+            { "id": "a3", "name": "type", "value": "={{ $('Code - Generar 5 Tareas').item.json.type }}", "type": "string" },
+            { "id": "a4", "name": "hora_asignacion", "value": "={{ $now }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ej3-set",
+      "name": "Edit Fields - Combinar Datos",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-140, 300]
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ $json.priority === 'Alta' ? 0 : ($json.priority === 'Media' ? 1 : 2) }}"
+      },
+      "id": "ej3-switch-priority",
+      "name": "Switch - Priority",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [80, 300]
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ $json.type === 'Tecnico' ? 0 : ($json.type === 'Marketing' ? 1 : 2) }}"
+      },
+      "id": "ej3-switch-type-alta",
+      "name": "Switch - Type (Alta)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [300, 0]
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ $json.type === 'Tecnico' ? 0 : ($json.type === 'Marketing' ? 1 : 2) }}"
+      },
+      "id": "ej3-switch-type-media",
+      "name": "Switch - Type (Media)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ $json.type === 'Tecnico' ? 0 : ($json.type === 'Marketing' ? 1 : 2) }}"
+      },
+      "id": "ej3-switch-type-baja",
+      "name": "Switch - Type (Baja)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [300, 600]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Gestor de Tareas" },
+        "sheetName": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Tareas_Tecnico_Alta" },
+        "columns": { "mappingMode": "defineBelow", "value": { "Activity": "={{ $json.activity }}", "Priority": "={{ $json.priority }}", "Type": "={{ $json.type }}", "Hora_Asignacion": "={{ $json.hora_asignacion }}" }, "matchingColumns": [], "schema": [] },
+        "options": {}
+      },
+      "id": "gs-tecnico-alta", "name": "GSheets - Tecnico Alta", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.4, "position": [540, -120],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "bLicu88mofcsnSNT", "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Gestor de Tareas" },
+        "sheetName": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Tareas_Marketing_Alta" },
+        "columns": { "mappingMode": "defineBelow", "value": { "Activity": "={{ $json.activity }}", "Priority": "={{ $json.priority }}", "Type": "={{ $json.type }}", "Hora_Asignacion": "={{ $json.hora_asignacion }}" }, "matchingColumns": [], "schema": [] },
+        "options": {}
+      },
+      "id": "gs-marketing-alta", "name": "GSheets - Marketing Alta", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.4, "position": [540, 0],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "bLicu88mofcsnSNT", "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Gestor de Tareas" },
+        "sheetName": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Tareas_Administrativo_Alta" },
+        "columns": { "mappingMode": "defineBelow", "value": { "Activity": "={{ $json.activity }}", "Priority": "={{ $json.priority }}", "Type": "={{ $json.type }}", "Hora_Asignacion": "={{ $json.hora_asignacion }}" }, "matchingColumns": [], "schema": [] },
+        "options": {}
+      },
+      "id": "gs-admin-alta", "name": "GSheets - Administrativo Alta", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.4, "position": [540, 120],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "bLicu88mofcsnSNT", "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Gestor de Tareas" },
+        "sheetName": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Tareas_Tecnico_Media" },
+        "columns": { "mappingMode": "defineBelow", "value": { "Activity": "={{ $json.activity }}", "Priority": "={{ $json.priority }}", "Type": "={{ $json.type }}", "Hora_Asignacion": "={{ $json.hora_asignacion }}" }, "matchingColumns": [], "schema": [] },
+        "options": {}
+      },
+      "id": "gs-tecnico-media", "name": "GSheets - Tecnico Media", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.4, "position": [540, 180],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "bLicu88mofcsnSNT", "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Gestor de Tareas" },
+        "sheetName": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Tareas_Marketing_Media" },
+        "columns": { "mappingMode": "defineBelow", "value": { "Activity": "={{ $json.activity }}", "Priority": "={{ $json.priority }}", "Type": "={{ $json.type }}", "Hora_Asignacion": "={{ $json.hora_asignacion }}" }, "matchingColumns": [], "schema": [] },
+        "options": {}
+      },
+      "id": "gs-marketing-media", "name": "GSheets - Marketing Media", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.4, "position": [540, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "bLicu88mofcsnSNT", "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Gestor de Tareas" },
+        "sheetName": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Tareas_Administrativo_Media" },
+        "columns": { "mappingMode": "defineBelow", "value": { "Activity": "={{ $json.activity }}", "Priority": "={{ $json.priority }}", "Type": "={{ $json.type }}", "Hora_Asignacion": "={{ $json.hora_asignacion }}" }, "matchingColumns": [], "schema": [] },
+        "options": {}
+      },
+      "id": "gs-admin-media", "name": "GSheets - Administrativo Media", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.4, "position": [540, 420],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "bLicu88mofcsnSNT", "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Gestor de Tareas" },
+        "sheetName": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Tareas_Tecnico_Baja" },
+        "columns": { "mappingMode": "defineBelow", "value": { "Activity": "={{ $json.activity }}", "Priority": "={{ $json.priority }}", "Type": "={{ $json.type }}", "Hora_Asignacion": "={{ $json.hora_asignacion }}" }, "matchingColumns": [], "schema": [] },
+        "options": {}
+      },
+      "id": "gs-tecnico-baja", "name": "GSheets - Tecnico Baja", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.4, "position": [540, 480],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "bLicu88mofcsnSNT", "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Gestor de Tareas" },
+        "sheetName": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Tareas_Marketing_Baja" },
+        "columns": { "mappingMode": "defineBelow", "value": { "Activity": "={{ $json.activity }}", "Priority": "={{ $json.priority }}", "Type": "={{ $json.type }}", "Hora_Asignacion": "={{ $json.hora_asignacion }}" }, "matchingColumns": [], "schema": [] },
+        "options": {}
+      },
+      "id": "gs-marketing-baja", "name": "GSheets - Marketing Baja", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.4, "position": [540, 600],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "bLicu88mofcsnSNT", "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Gestor de Tareas" },
+        "sheetName": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Tareas_Administrativo_Baja" },
+        "columns": { "mappingMode": "defineBelow", "value": { "Activity": "={{ $json.activity }}", "Priority": "={{ $json.priority }}", "Type": "={{ $json.type }}", "Hora_Asignacion": "={{ $json.hora_asignacion }}" }, "matchingColumns": [], "schema": [] },
+        "options": {}
+      },
+      "id": "gs-admin-baja", "name": "GSheets - Administrativo Baja", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.4, "position": [540, 720],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "bLicu88mofcsnSNT", "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": { "numberInputs": 9 },
+      "id": "ej3-merge", "name": "Merge - Consolidar", "type": "n8n-nodes-base.merge", "typeVersion": 2.1, "position": [780, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Gestor de Tareas" },
+        "sheetName": { "__rl": true, "value": "", "mode": "list", "cachedResultName": "Registro_General" },
+        "columns": { "mappingMode": "defineBelow", "value": { "Activity": "={{ $json.activity }}", "Priority": "={{ $json.priority }}", "Type": "={{ $json.type }}", "Hora_Asignacion": "={{ $json.hora_asignacion }}" }, "matchingColumns": [], "schema": [] },
+        "options": {}
+      },
+      "id": "gs-registro", "name": "GSheets - Registro General", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.4, "position": [1000, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "bLicu88mofcsnSNT", "name": "Google Sheets account" } }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": { "main": [[{ "node": "Code - Generar 5 Tareas", "type": "main", "index": 0 }]] },
+    "Code - Generar 5 Tareas": { "main": [[{ "node": "HTTP Request - Bored API", "type": "main", "index": 0 }]] },
+    "HTTP Request - Bored API": { "main": [[{ "node": "Edit Fields - Combinar Datos", "type": "main", "index": 0 }]] },
+    "Edit Fields - Combinar Datos": { "main": [[{ "node": "Switch - Priority", "type": "main", "index": 0 }]] },
+    "Switch - Priority": {
+      "main": [
+        [{ "node": "Switch - Type (Alta)", "type": "main", "index": 0 }],
+        [{ "node": "Switch - Type (Media)", "type": "main", "index": 0 }],
+        [{ "node": "Switch - Type (Baja)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Switch - Type (Alta)": {
+      "main": [
+        [{ "node": "GSheets - Tecnico Alta", "type": "main", "index": 0 }],
+        [{ "node": "GSheets - Marketing Alta", "type": "main", "index": 0 }],
+        [{ "node": "GSheets - Administrativo Alta", "type": "main", "index": 0 }]
+      ]
+    },
+    "Switch - Type (Media)": {
+      "main": [
+        [{ "node": "GSheets - Tecnico Media", "type": "main", "index": 0 }],
+        [{ "node": "GSheets - Marketing Media", "type": "main", "index": 0 }],
+        [{ "node": "GSheets - Administrativo Media", "type": "main", "index": 0 }]
+      ]
+    },
+    "Switch - Type (Baja)": {
+      "main": [
+        [{ "node": "GSheets - Tecnico Baja", "type": "main", "index": 0 }],
+        [{ "node": "GSheets - Marketing Baja", "type": "main", "index": 0 }],
+        [{ "node": "GSheets - Administrativo Baja", "type": "main", "index": 0 }]
+      ]
+    },
+    "GSheets - Tecnico Alta": { "main": [[{ "node": "Merge - Consolidar", "type": "main", "index": 0 }]] },
+    "GSheets - Marketing Alta": { "main": [[{ "node": "Merge - Consolidar", "type": "main", "index": 1 }]] },
+    "GSheets - Administrativo Alta": { "main": [[{ "node": "Merge - Consolidar", "type": "main", "index": 2 }]] },
+    "GSheets - Tecnico Media": { "main": [[{ "node": "Merge - Consolidar", "type": "main", "index": 3 }]] },
+    "GSheets - Marketing Media": { "main": [[{ "node": "Merge - Consolidar", "type": "main", "index": 4 }]] },
+    "GSheets - Administrativo Media": { "main": [[{ "node": "Merge - Consolidar", "type": "main", "index": 5 }]] },
+    "GSheets - Tecnico Baja": { "main": [[{ "node": "Merge - Consolidar", "type": "main", "index": 6 }]] },
+    "GSheets - Marketing Baja": { "main": [[{ "node": "Merge - Consolidar", "type": "main", "index": 7 }]] },
+    "GSheets - Administrativo Baja": { "main": [[{ "node": "Merge - Consolidar", "type": "main", "index": 8 }]] },
+    "Merge - Consolidar": { "main": [[{ "node": "GSheets - Registro General", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "ej3-v1",
+  "meta": { "templateCredsSetupCompleted": true, "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b" },
+  "id": "ejercicio3-gestor-tareas",
+  "tags": []
+}
+
