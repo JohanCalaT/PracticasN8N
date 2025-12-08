@@ -1,0 +1,11 @@
+# Datos de n8n (contiene credenciales y base de datos local)
+n8n-data/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+

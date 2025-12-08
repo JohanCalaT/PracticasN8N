@@ -1,0 +1,115 @@
+{
+  "name": "Practica 01 - Introduccion a n8n",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "mensaje-hola",
+              "name": "mensaje",
+              "value": "Hola, mundo desde n8n",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "set-hola-mundo",
+      "name": "Ejercicio 1 - Hola Mundo",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://v2.jokeapi.dev/joke/Programming?type=single",
+        "options": {}
+      },
+      "id": "http-request",
+      "name": "Ejercicio 2 - HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "broma",
+              "name": "broma",
+              "value": "={{ $json.joke }}",
+              "type": "string"
+            },
+            {
+              "id": "categoria",
+              "name": "categoria",
+              "value": "={{ $json.category }}",
+              "type": "string"
+            },
+            {
+              "id": "identificador",
+              "name": "identificador",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "id": "set-transformacion",
+      "name": "Ejercicio 3 - Transformacion",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [960, 300]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Ejercicio 1 - Hola Mundo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ejercicio 1 - Hola Mundo": {
+      "main": [
+        [
+          {
+            "node": "Ejercicio 2 - HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ejercicio 2 - HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Ejercicio 3 - Transformacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": []
+}
+
