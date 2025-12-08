@@ -1,0 +1,116 @@
+{
+  "name": "Practica 04 - Procesador Principal de Imagenes",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "18e31ea2-058c-4042-aa08-cfa92a6727d0",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "urls-field",
+              "name": "imageUrls",
+              "value": "=[\n  {\"imageUrl\": \"https://picsum.photos/200\"},\n  {\"imageUrl\": \"https://picsum.photos/300\"},\n  {\"imageUrl\": \"https://esta-url-no-existe-error.xyz/imagen.jpg\"}\n]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8cf73632-0b58-451e-8a79-cd976832f608",
+      "name": "Edit Fields - Lista URLs",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "imageUrls",
+        "options": {}
+      },
+      "id": "3ac6f24f-926a-4943-b34c-9df7a2c85295",
+      "name": "Split Out - Separar URLs",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "lP7e6YVjHh6xVuql",
+        "options": {}
+      },
+      "id": "c1afcd8c-53f8-402c-b160-6bc6e8857850",
+      "name": "Execute Workflow - Descargar",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        672,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Lista URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - Lista URLs": {
+      "main": [
+        [
+          {
+            "node": "Split Out - Separar URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out - Separar URLs": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow - Descargar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "cS3tZGOA1tCnxSlV"
+  },
+  "versionId": "6447845d-b133-4c53-b32a-ac77600b5818",
+  "meta": {
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "5hXELMQhZRd3A935",
+  "tags": []
+}

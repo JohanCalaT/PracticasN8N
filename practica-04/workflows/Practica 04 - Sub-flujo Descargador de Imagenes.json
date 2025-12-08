@@ -1,0 +1,102 @@
+{
+  "name": "Practica 04 - Sub-flujo Descargador de Imagenes",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "={{ $json.imageUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "f03e7c95-64e9-42e1-996e-de5bcda5c34f",
+      "name": "HTTP Request - Descargar Imagen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        976,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "status-field",
+              "name": "status",
+              "value": "descargado",
+              "type": "string"
+            },
+            {
+              "id": "url-field",
+              "name": "originalUrl",
+              "value": "={{ $('Execute Workflow Trigger').item.json.imageUrl }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c9e63f24-5ac8-424c-8f9a-445a801dfc17",
+      "name": "Edit Fields - Resultado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1232,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        736,
+        192
+      ],
+      "id": "8bdf0f47-4a36-4746-b181-6a317659142c",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request - Descargar Imagen": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Descargar Imagen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8d8cc4e6-7fec-4087-bfe2-4667b30c07e5",
+  "meta": {
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "lP7e6YVjHh6xVuql",
+  "tags": []
+}

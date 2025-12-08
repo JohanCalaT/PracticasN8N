@@ -1,0 +1,134 @@
+{
+  "name": "Practica 04 - Ejercicio 2 - Flujo Principal Productos",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "2650cede-63b1-43b2-a2c3-a6c0916ea822",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/products/1",
+        "options": {}
+      },
+      "id": "d6e8b17a-b10c-404c-a1b0-167f4b51dd8a",
+      "name": "HTTP Request - Fake Store API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-field",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "title-field",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "category-field",
+              "name": "category",
+              "value": "={{ $json.category }}",
+              "type": "string"
+            },
+            {
+              "id": "description-field",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ceebfa17-828c-4747-8abc-1ba4f85303bf",
+      "name": "Edit Fields - Quitar Price",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "koXf61DEoJIdQRah",
+        "options": {}
+      },
+      "id": "019deaca-f0bd-4450-b8d5-1316e0eda32f",
+      "name": "Execute Workflow - Validar",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        672,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Fake Store API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - Fake Store API": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Quitar Price",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - Quitar Price": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow - Validar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "F9oOlrkLvnsg6xLT"
+  },
+  "versionId": "143be0d6-f20d-4b61-a163-dd1780104c24",
+  "meta": {
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "9QNdlMTIbzyG8Vcj",
+  "tags": []
+}

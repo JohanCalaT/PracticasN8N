@@ -1,0 +1,133 @@
+{
+  "name": "Practica 04 - Manejador de Errores",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "3e8c9c95-7a9c-4250-807b-a11d0a6fcf53",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "18FZnaDGQ-Mr9gEhZvl41AVtNXYCszg0zZFWtbDEp1SE",
+          "mode": "list",
+          "cachedResultName": "Registro de Errores n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18FZnaDGQ-Mr9gEhZvl41AVtNXYCszg0zZFWtbDEp1SE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18FZnaDGQ-Mr9gEhZvl41AVtNXYCszg0zZFWtbDEp1SE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Workflow Fallido": "={{ $json.workflow.name }}",
+            "Nodo Fallido": "={{ $json.execution.lastNodeExecuted }}",
+            "Mensaje de Error": "={{ $json.execution.error.message }}",
+            "URL de Ejecución": "={{ $json.execution.url }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Workflow Fallido",
+              "displayName": "Workflow Fallido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nodo Fallido",
+              "displayName": "Nodo Fallido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Mensaje de Error",
+              "displayName": "Mensaje de Error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "URL de Ejecución",
+              "displayName": "URL de Ejecución",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bc630a20-122f-4152-87bf-6aac94df1d5f",
+      "name": "Google Sheets - Registrar Error",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        256,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bLicu88mofcsnSNT",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - Registrar Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3905e33e-f398-4ced-a42e-9f56a6c2b18d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "cS3tZGOA1tCnxSlV",
+  "tags": []
+}

@@ -1,0 +1,103 @@
+{
+  "name": "Practica 04 - Ejercicio 3 - Sub-flujo Obtener Festivos",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "e32e67a4-86f5-4683-9c06-54c28f118170",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        704,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://date.nager.at/api/v3/PublicHolidays/2025/ES",
+        "options": {}
+      },
+      "id": "db32e391-b863-4360-ac00-7ebcac3d1750",
+      "name": "HTTP Request - Holidays API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "tipo-field",
+              "name": "tipo",
+              "value": "festivos",
+              "type": "string"
+            },
+            {
+              "id": "nombre-field",
+              "name": "primerFestivo",
+              "value": "={{ $json[0].localName }}",
+              "type": "string"
+            },
+            {
+              "id": "fecha-field",
+              "name": "fechaPrimerFestivo",
+              "value": "={{ $json[0].date }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "28609d35-4ef9-47a0-a74b-d22ad327570f",
+      "name": "Edit Fields - Formato Festivos",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1216,
+        192
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Holidays API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - Holidays API": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Formato Festivos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "82d57dba-932d-44f0-893c-7cc6ade1ebac",
+  "meta": {
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "Eo6XafH5QuuVOxD2",
+  "tags": []
+}

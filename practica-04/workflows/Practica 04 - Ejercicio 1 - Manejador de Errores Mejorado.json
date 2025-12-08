@@ -1,0 +1,163 @@
+{
+  "name": "Practica 04 - Ejercicio 1 - Manejador de Errores Mejorado",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "871542d7-6bce-4a0a-af7b-6627113bc32a",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "18FZnaDGQ-Mr9gEhZvl41AVtNXYCszg0zZFWtbDEp1SE",
+          "mode": "list",
+          "cachedResultName": "Registro de Errores n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18FZnaDGQ-Mr9gEhZvl41AVtNXYCszg0zZFWtbDEp1SE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18FZnaDGQ-Mr9gEhZvl41AVtNXYCszg0zZFWtbDEp1SE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Workflow Fallido": "={{ $json.workflow.name }}",
+            "Nodo Fallido": "={{ $json.execution.lastNodeExecuted }}",
+            "Mensaje de Error": "={{ $json.execution.error.message }}",
+            "URL de Ejecución": "={{ $json.execution.url }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Workflow Fallido",
+              "displayName": "Workflow Fallido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nodo Fallido",
+              "displayName": "Nodo Fallido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Mensaje de Error",
+              "displayName": "Mensaje de Error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "URL de Ejecución",
+              "displayName": "URL de Ejecución",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "62a1d340-1202-45cd-bb8f-18cf92aad829",
+      "name": "Google Sheets - Registrar Error",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        80,
+        -96
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bLicu88mofcsnSNT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "jct576@inlumine.ual.es",
+        "subject": "=🚨 ¡Alerta de Error en n8n! - {{ $json.workflow.name }}",
+        "message": "=Se ha producido un error en n8n:\n\n📋 DETALLES DEL ERROR\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n🔹 Workflow Fallido: {{ $json.workflow.name }}\n🔹 Nodo que Falló: {{ $json.execution.lastNodeExecuted }}\n🔹 Mensaje de Error: {{ $json.execution.error.message }}\n🔹 Fecha/Hora: {{ $now }}\n\n🔗 Ver ejecución: {{ $json.execution.url }}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nEste es un mensaje automático generado por n8n.",
+        "options": {}
+      },
+      "id": "09ee988f-b194-4d99-8f25-89ccae1eaca2",
+      "name": "Gmail - Enviar Alerta",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        80,
+        112
+      ],
+      "webhookId": "d74b3eba-5458-44f2-a2ed-8d9904d7adcd",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "C6ytAFeP00d6VUc1",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - Registrar Error",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gmail - Enviar Alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "54fb6d6f-c863-42a9-bb60-80e3aef20e89",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "F9oOlrkLvnsg6xLT",
+  "tags": []
+}

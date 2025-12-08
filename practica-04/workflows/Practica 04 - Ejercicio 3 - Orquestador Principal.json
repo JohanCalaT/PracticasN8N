@@ -1,0 +1,254 @@
+{
+  "name": "Practica 04 - Ejercicio 3 - Orquestador Principal",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "96ed97e7-46b6-4524-8978-a6e675235274",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        80,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "tarea-field",
+              "name": "tarea",
+              "value": "festivos",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "49770f25-24a4-4f40-8c40-2d7ddad8511e",
+      "name": "Edit Fields - Variable de Control",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tarea }}",
+                    "rightValue": "actividad",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "actividad"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tarea }}",
+                    "rightValue": "festivos",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "festivos"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "770c862f-5725-4fdb-a290-2523d63b090b",
+      "name": "Switch - Seleccionar Tarea",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        512,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "euLjT9xAOxRdDAXt",
+        "options": {}
+      },
+      "id": "8adc93fd-8adc-4a5e-bd9f-7d7df4066ec9",
+      "name": "Execute Workflow - Actividad",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        768,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "euLjT9xAOxRdDAXt",
+        "options": {}
+      },
+      "id": "74e78e90-838f-4546-a041-0f0b92b7d614",
+      "name": "Execute Workflow - Festivos",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        768,
+        240
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "3cfeb893-336c-41fc-b60f-a5395707ecb3",
+      "name": "Merge - Consolidar",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1024,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "resultado-field",
+              "name": "resultado",
+              "value": "=Tarea ejecutada: {{ $json.tipo }}",
+              "type": "string"
+            },
+            {
+              "id": "datos-field",
+              "name": "datos",
+              "value": "={{ $json }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8d9cf6e6-023d-4baf-a874-3bd342c53fe6",
+      "name": "Edit Fields - Verificar Salida",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1248,
+        144
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Variable de Control",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - Variable de Control": {
+      "main": [
+        [
+          {
+            "node": "Switch - Seleccionar Tarea",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch - Seleccionar Tarea": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow - Actividad",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Workflow - Festivos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow - Actividad": {
+      "main": [
+        [
+          {
+            "node": "Merge - Consolidar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow - Festivos": {
+      "main": [
+        [
+          {
+            "node": "Merge - Consolidar",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge - Consolidar": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Verificar Salida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "25a3630e-75b3-4e32-8b6c-d20d6fbef250",
+  "meta": {
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "Mq9DoIoJwgjPkD26",
+  "tags": []
+}

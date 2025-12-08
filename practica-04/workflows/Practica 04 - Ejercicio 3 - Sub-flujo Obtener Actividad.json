@@ -1,0 +1,108 @@
+{
+  "name": "Practica 04 - Ejercicio 3 - Sub-flujo Obtener Actividad",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "5ef0e778-3b1d-48f8-a61a-fef0e7a2ef88",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://bored-api.appbrewery.com/random",
+        "options": {}
+      },
+      "id": "9d57b32f-67e7-4a67-aa2f-ad692512524a",
+      "name": "HTTP Request - Bored API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        256,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "tipo-field",
+              "name": "tipo",
+              "value": "actividad",
+              "type": "string"
+            },
+            {
+              "id": "actividad-field",
+              "name": "actividad",
+              "value": "={{ $json.activity }}",
+              "type": "string"
+            },
+            {
+              "id": "type-field",
+              "name": "categoria",
+              "value": "={{ $json.type }}",
+              "type": "string"
+            },
+            {
+              "id": "participants-field",
+              "name": "participantes",
+              "value": "={{ $json.participants }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f536a13a-6a36-43db-b8e0-33f3c5b37cec",
+      "name": "Edit Fields - Formato Actividad",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        512,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Bored API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - Bored API": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Formato Actividad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "57c3a8ba-2dd8-4aa0-9ab7-bbcfbb4ac666",
+  "meta": {
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "euLjT9xAOxRdDAXt",
+  "tags": []
+}

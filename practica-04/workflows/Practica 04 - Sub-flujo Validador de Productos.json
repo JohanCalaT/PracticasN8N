@@ -1,0 +1,150 @@
+{
+  "name": "Practica 04 - Sub-flujo Validador de Productos",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "7b4bb63d-d4f4-45fd-ac12-64c33afcda7b",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -496,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-title",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            },
+            {
+              "id": "condition-price",
+              "leftValue": "={{ $json.price }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "713f8db5-d8ea-4307-9875-3d4010c84417",
+      "name": "IF - Validar Campos",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "Validación fallida: Faltan campos de producto obligatorios (title o price)"
+      },
+      "id": "2d1c0d15-a66e-44c7-958f-e42f5d9f22a7",
+      "name": "Stop and Error",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        0,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "valid-field",
+              "name": "validado",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "title-field",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "price-field",
+              "name": "price",
+              "value": "={{ $json.price }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "42bb6c66-e5e7-4e32-9c18-2dc15e9d3f6f",
+      "name": "Edit Fields - Producto Válido",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "IF - Validar Campos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Validar Campos": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Producto Válido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "903aa63a-756f-4684-8fa4-0f7c1c6a061e",
+  "meta": {
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "koXf61DEoJIdQRah",
+  "tags": []
+}
