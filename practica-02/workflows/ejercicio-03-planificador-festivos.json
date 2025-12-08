@@ -1,0 +1,146 @@
+{
+  "name": "Practica 02 - Ejercicio 3: Planificador de Festivos",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://date.nager.at/api/v3/PublicHolidays/2025/ES",
+        "options": {}
+      },
+      "id": "http-festivos",
+      "name": "HTTP Request - Festivos España 2025",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "" },
+          "conditions": [
+            {
+              "id": "condition-global",
+              "leftValue": "={{ $json.global }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-nacional",
+      "name": "IF - Es Festivo Nacional?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://bored-api.appbrewery.com/random",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": []
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 1000
+            }
+          }
+        }
+      },
+      "id": "http-actividad",
+      "name": "HTTP Request - Obtener Actividad",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [940, 200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "festivo",
+              "name": "festivo",
+              "value": "={{ $('IF - Es Festivo Nacional?').item.json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "localName",
+              "name": "festivo_local",
+              "value": "={{ $('IF - Es Festivo Nacional?').item.json.localName }}",
+              "type": "string"
+            },
+            {
+              "id": "fecha",
+              "name": "fecha",
+              "value": "={{ $('IF - Es Festivo Nacional?').item.json.date }}",
+              "type": "string"
+            },
+            {
+              "id": "actividad",
+              "name": "actividad",
+              "value": "={{ $json.activity }}",
+              "type": "string"
+            },
+            {
+              "id": "tipo-actividad",
+              "name": "tipo_actividad",
+              "value": "={{ $json.type }}",
+              "type": "string"
+            },
+            {
+              "id": "participantes",
+              "name": "participantes",
+              "value": "={{ $json.participants }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-resultado",
+      "name": "Set - Combinar Festivo y Actividad",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1180, 200]
+    },
+    {
+      "parameters": {},
+      "id": "no-op",
+      "name": "No Operation",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [940, 420]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[{ "node": "HTTP Request - Festivos España 2025", "type": "main", "index": 0 }]]
+    },
+    "HTTP Request - Festivos España 2025": {
+      "main": [[{ "node": "IF - Es Festivo Nacional?", "type": "main", "index": 0 }]]
+    },
+    "IF - Es Festivo Nacional?": {
+      "main": [
+        [{ "node": "HTTP Request - Obtener Actividad", "type": "main", "index": 0 }],
+        [{ "node": "No Operation", "type": "main", "index": 0 }]
+      ]
+    },
+    "HTTP Request - Obtener Actividad": {
+      "main": [[{ "node": "Set - Combinar Festivo y Actividad", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": []
+}

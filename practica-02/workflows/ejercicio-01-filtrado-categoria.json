@@ -1,0 +1,134 @@
+{
+  "name": "Practica 02 - Ejercicio 1: Filtrado por Categoria",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "minutes", "minutesInterval": 1 }]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://v2.jokeapi.dev/joke/Programming,Misc?type=single&amount=5",
+        "options": {}
+      },
+      "id": "http-request",
+      "name": "HTTP Request - Obtener Chistes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "jokes",
+        "options": {}
+      },
+      "id": "split-out",
+      "name": "Split Out - Separar Chistes",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [710, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "" },
+          "conditions": [
+            {
+              "id": "condition-category",
+              "leftValue": "={{ $json.category }}",
+              "rightValue": "Programming",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-categoria",
+      "name": "IF - Es Programming?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [940, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "tipo-categoria",
+              "name": "tipo_categoria",
+              "value": "Chiste de Programacion",
+              "type": "string"
+            },
+            {
+              "id": "chiste",
+              "name": "chiste",
+              "value": "={{ $json.joke }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-programming",
+      "name": "Set - Programming",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1180, 200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "tipo-categoria",
+              "name": "tipo_categoria",
+              "value": "Chiste Miscelaneo",
+              "type": "string"
+            },
+            {
+              "id": "chiste",
+              "name": "chiste",
+              "value": "={{ $json.joke }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-misc",
+      "name": "Set - Misc",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1180, 420]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [[{ "node": "HTTP Request - Obtener Chistes", "type": "main", "index": 0 }]]
+    },
+    "HTTP Request - Obtener Chistes": {
+      "main": [[{ "node": "Split Out - Separar Chistes", "type": "main", "index": 0 }]]
+    },
+    "Split Out - Separar Chistes": {
+      "main": [[{ "node": "IF - Es Programming?", "type": "main", "index": 0 }]]
+    },
+    "IF - Es Programming?": {
+      "main": [
+        [{ "node": "Set - Programming", "type": "main", "index": 0 }],
+        [{ "node": "Set - Misc", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": []
+}
+
