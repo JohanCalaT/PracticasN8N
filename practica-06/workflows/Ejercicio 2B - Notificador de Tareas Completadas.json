@@ -1,0 +1,163 @@
+{
+  "name": "Ejercicio 2B - Notificador de Tareas Completadas",
+  "nodes": [
+    {
+      "parameters": {
+        "queue": "task_completed",
+        "options": {
+          "contentIsBinary": false
+        }
+      },
+      "id": "9a799fbf-065a-4fcd-a1ef-698d663f3d78",
+      "name": "RabbitMQ Trigger - task_completed",
+      "type": "n8n-nodes-base.rabbitmqTrigger",
+      "typeVersion": 1,
+      "position": [
+        592,
+        208
+      ],
+      "credentials": {
+        "rabbitmq": {
+          "id": "u3idU7mMXXCOoVPQ",
+          "name": "RabbitMQ account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parsear el content que viene como string JSON\nconst content = JSON.parse($input.first().json.content);\n\nreturn {\n  id: content.id,\n  title: content.title,\n  description: content.description,\n  done: content.done\n};"
+      },
+      "id": "1f6b9398-f4e6-4dcc-a7ff-052634d55595",
+      "name": "Code - Parsear Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "notif-title",
+              "name": "titulo_tarea",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "notif-id",
+              "name": "id_tarea",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "notif-desc",
+              "name": "descripcion",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "notif-fecha",
+              "name": "fecha_notificacion",
+              "value": "={{ $now.format('dd/MM/yyyy HH:mm:ss') }}",
+              "type": "string"
+            },
+            {
+              "id": "notif-subject",
+              "name": "email_subject",
+              "value": "=✅ Tarea Completada: {{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "notif-body",
+              "name": "email_body",
+              "value": "=<h2>✅ Tarea Completada</h2><p><strong>Título:</strong> {{ $json.title }}</p><p><strong>ID:</strong> {{ $json.id }}</p><p><strong>Descripción:</strong> {{ $json.description }}</p><p><strong>Fecha:</strong> {{ $now.format('dd/MM/yyyy HH:mm:ss') }}</p><hr><p><em>Notificación enviada automáticamente por n8n</em></p>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5d68c4b1-5ed5-4a5a-98ef-fca341ecce75",
+      "name": "Edit Fields - Preparar Notificacion",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1072,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "johan.eduardo.cala2002@gmail.com",
+        "subject": "={{ $json.email_subject }}",
+        "message": "={{ $json.email_body }}",
+        "options": {}
+      },
+      "id": "a2d69f2d-c7eb-4fb0-afb8-f2865748aa69",
+      "name": "Gmail - Enviar Notificacion",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1312,
+        208
+      ],
+      "webhookId": "a4d22815-4ffd-4804-8a23-4842e569da08",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "C6ytAFeP00d6VUc1",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RabbitMQ Trigger - task_completed": {
+      "main": [
+        [
+          {
+            "node": "Code - Parsear Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Parsear Content": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Preparar Notificacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - Preparar Notificacion": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Enviar Notificacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "36a72d31-7058-48c5-8dc8-a7c1075eac93",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "BNgkQ92G1CLc8Wfm",
+  "tags": []
+}

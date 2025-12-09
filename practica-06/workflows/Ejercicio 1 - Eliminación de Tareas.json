@@ -1,0 +1,145 @@
+{
+  "name": "Ejercicio 1 - Eliminación de Tareas",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "02c1465d-8b2b-4ad3-bba9-917566c9466b",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-a-borrar",
+              "name": "id_a_borrar",
+              "value": 8,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "727d582e-a847-466e-a6cf-7118d794b070",
+      "name": "Edit Fields - ID a Borrar",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "deleteTable",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "name"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tasks",
+          "mode": "raw"
+        },
+        "options": {}
+      },
+      "id": "b64f6568-fdd7-442b-b5d1-59351c9de279",
+      "name": "PostgreSQL - Delete",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        480,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "zXV9MnENeh96zg01",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "name"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tasks",
+          "mode": "raw"
+        },
+        "options": {}
+      },
+      "id": "c19eeaae-2d91-46fe-a374-dde799cc8f22",
+      "name": "PostgreSQL - Verificar",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        720,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "zXV9MnENeh96zg01",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - ID a Borrar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - ID a Borrar": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Delete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Delete": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Verificar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "14a88142-b257-471f-bf45-551b4a28d0c3",
+  "meta": {
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "HnICkwQCfa6AAlHU",
+  "tags": []
+}

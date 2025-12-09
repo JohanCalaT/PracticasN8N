@@ -1,0 +1,100 @@
+{
+  "name": "Flujo 2A - Productor de Tareas",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crear-tarea",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "31787fa4-bab6-4a55-b02f-a718fd55ebb4",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "crear-tarea-webhook"
+    },
+    {
+      "parameters": {
+        "queue": "task_created",
+        "options": {}
+      },
+      "id": "fbd6fdc7-43a8-4a57-9ec0-1ab09f6f40f3",
+      "name": "RabbitMQ - Send",
+      "type": "n8n-nodes-base.rabbitmq",
+      "typeVersion": 1,
+      "position": [
+        240,
+        0
+      ],
+      "credentials": {
+        "rabbitmq": {
+          "id": "u3idU7mMXXCOoVPQ",
+          "name": "RabbitMQ account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Tarea enviada a RabbitMQ\", \"data\": $json } }}",
+        "options": {}
+      },
+      "id": "6b55a267-25f8-4bd1-a42e-b886431b084e",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "RabbitMQ - Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RabbitMQ - Send": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1a1ba08f-5c7d-41ea-9a5a-a7de33802cb1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "POhRTETqS3OPmMtf",
+  "tags": [
+    {
+      "name": "Practica 6",
+      "id": "21FzkP3Rs84G9SWr",
+      "updatedAt": "2025-12-09T15:31:29.109Z",
+      "createdAt": "2025-12-09T15:31:29.109Z"
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "name": "Flujo 1 - Interacción Directa PostgreSQL",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "cc371f4f-e0cf-4308-af5b-c14b12fd34c0",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "name"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tasks",
+          "mode": "raw"
+        },
+        "options": {}
+      },
+      "id": "592118ed-b77d-45d4-bf12-9ef8093ac330",
+      "name": "PostgreSQL - Select",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        240,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "zXV9MnENeh96zg01",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Select",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ebb299fb-bd72-4f19-ad89-0f8418f7c09f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "gLSAYtab7sY5vHkP",
+  "tags": [
+    {
+      "name": "Practica 6",
+      "id": "21FzkP3Rs84G9SWr",
+      "updatedAt": "2025-12-09T15:31:29.109Z",
+      "createdAt": "2025-12-09T15:31:29.109Z"
+    }
+  ]
+}

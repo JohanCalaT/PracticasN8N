@@ -1,0 +1,94 @@
+{
+  "name": "Flujo 2B - Consumidor de Tareas",
+  "nodes": [
+    {
+      "parameters": {
+        "queue": "task_created",
+        "options": {
+          "contentIsBinary": false
+        }
+      },
+      "id": "4cd0a64e-e1b3-473c-91d9-d93228905913",
+      "name": "RabbitMQ Trigger",
+      "type": "n8n-nodes-base.rabbitmqTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "credentials": {
+        "rabbitmq": {
+          "id": "u3idU7mMXXCOoVPQ",
+          "name": "RabbitMQ account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assignment-1",
+              "name": "procesado_por",
+              "value": "n8n_consumidor",
+              "type": "string"
+            },
+            {
+              "id": "assignment-2",
+              "name": "fecha_procesamiento",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "assignment-3",
+              "name": "mensaje_original",
+              "value": "={{ JSON.stringify($json) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e8b666b3-e523-464c-abfe-63e09b5ef3c5",
+      "name": "Edit Fields - Procesar",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RabbitMQ Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Procesar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d2ee75fb-3c45-4c03-8b6d-58296405d1a2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "8WLhHXQtyQisIipN",
+  "tags": [
+    {
+      "name": "Practica 6",
+      "id": "21FzkP3Rs84G9SWr",
+      "updatedAt": "2025-12-09T15:31:29.109Z",
+      "createdAt": "2025-12-09T15:31:29.109Z"
+    }
+  ]
+}

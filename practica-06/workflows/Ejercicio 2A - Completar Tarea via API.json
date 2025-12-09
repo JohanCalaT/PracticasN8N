@@ -1,0 +1,89 @@
+{
+  "name": "Ejercicio 2A - Completar Tarea via API",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "b739393b-5453-4a02-bd5b-a43892ba13af",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        528,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "task-id",
+              "name": "task_id",
+              "value": 15,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d9cb106b-cee8-4dc6-85d2-3f45a6f731b3",
+      "name": "Edit Fields - Task ID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        768,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=http://task-manager-web:5000/tasks/{{ $json.task_id }}/complete",
+        "options": {}
+      },
+      "id": "956c8919-e982-4c3c-96fd-33d359cf02d1",
+      "name": "HTTP Request - Complete Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1008,
+        -128
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Task ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - Task ID": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Complete Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "41a4ab76-7aa3-46bb-8575-adbbc86fa2f6",
+  "meta": {
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "id": "BKQKJu2LVqZ88H7e",
+  "tags": []
+}
