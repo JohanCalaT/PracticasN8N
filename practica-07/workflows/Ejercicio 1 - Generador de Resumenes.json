@@ -1,0 +1,198 @@
+{
+  "name": "Ejercicio 1 - Generador de Resúmenes",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        240
+      ],
+      "id": "57b70a50-4e3b-45ac-a966-3c4e1f4d26e5",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM tasks WHERE description IS NOT NULL AND description != '' LIMIT 5;",
+        "options": {}
+      },
+      "id": "de42aa62-391a-4917-9a1f-51f9d59c5288",
+      "name": "Execute a SQL query",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -896,
+        240
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "zXV9MnENeh96zg01",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.0-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Genera un resumen conciso de una sola frase (máximo 15 palabras) para la siguiente tarea:\n\n\"{{ $json.description }}\"\n\nResponde ÚNICAMENTE con el resumen, sin introducción ni explicaciones adicionales."
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        240
+      ],
+      "id": "3917825a-b947-48b8-a925-468fe7510873",
+      "name": "Gemini - Generar Resumen",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "IXzNIt7jqHymadAq",
+          "name": "Gemini Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "keep-id",
+              "name": "id",
+              "value": "={{ $('Execute a SQL query').item.json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "keep-title",
+              "name": "title",
+              "value": "={{ $('Execute a SQL query').item.json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "keep-description",
+              "name": "description",
+              "value": "={{ $('Execute a SQL query').item.json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "keep-done",
+              "name": "done",
+              "value": "={{ $('Execute a SQL query').item.json.done }}",
+              "type": "boolean"
+            },
+            {
+              "id": "extract-resumen",
+              "name": "resumen",
+              "value": "={{ $json.content.parts[0].text.trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "26405fe0-0e58-4adf-a963-dbd428ba0f18",
+      "name": "Edit Fields - Guardar Resumen",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -416,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "format-output",
+              "name": "resultado_formateado",
+              "value": "=📋 **Tarea #{{ $json.id }}**: {{ $json.title }}\n\n📝 **Descripción Original:**\n{{ $json.description }}\n\n✨ **Resumen Generado por IA:**\n{{ $json.resumen }}\n\n---",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-output-id",
+      "name": "Edit Fields - Formatear Salida",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        240
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Gemini - Generar Resumen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini - Generar Resumen": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Guardar Resumen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - Guardar Resumen": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Formatear Salida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "tags": []
+}

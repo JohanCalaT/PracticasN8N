@@ -1,0 +1,440 @@
+{
+  "name": "Flujo CORREGIDO - Referencia Nodos Anteriores",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        240
+      ],
+      "id": "dc1418f0-20fe-4a6d-b8ef-b846f3685b51",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM tasks WHERE description IS NOT NULL AND description != '' LIMIT 5;",
+        "options": {}
+      },
+      "id": "32534d7b-4529-47b0-b889-7e92f17f102b",
+      "name": "Execute a SQL query",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -704,
+        240
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "zXV9MnENeh96zg01",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "prompt": "=Eres un jefe de proyecto experimentado. Basándote en la siguiente descripción de una tarea, determina su prioridad. Responde ÚNICAMENTE con una de estas tres palabras: ALTA, MEDIA o BAJA.\n\nDescripción de la tarea: \"{{ $json.description }}\"",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        240
+      ],
+      "id": "030154bd-1fa5-4eb4-87b4-50867d36bdff",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "IXzNIt7jqHymadAq",
+          "name": "Gemini Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "keep-id",
+              "name": "task_id",
+              "value": "={{ $('Execute a SQL query').item.json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "keep-title",
+              "name": "task_title",
+              "value": "={{ $('Execute a SQL query').item.json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "keep-description",
+              "name": "task_description",
+              "value": "={{ $('Execute a SQL query').item.json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "extract-priority",
+              "name": "prioridad",
+              "value": "={{ $json.content.parts[0].text.trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "preserve-data-id",
+      "name": "Preservar Datos + Extraer Prioridad",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -288,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.prioridad }}",
+                    "rightValue": "ALTA",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ALTA"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "c6470adc-0854-4686-95bb-240d73bc0e72",
+                    "leftValue": "={{ $json.prioridad }}",
+                    "rightValue": "MEDIA",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "MEDIA"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "7b89aa74-a766-421d-9bde-a27862e6c535",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -48,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "email-subject",
+              "name": "email_subject",
+              "value": "=🚨 ¡ALERTA! Tarea Prioridad ALTA: {{ $json.task_title }}",
+              "type": "string"
+            },
+            {
+              "id": "email-body",
+              "name": "email_body",
+              "value": "=<h2 style=\"color: #d32f2f;\">🚨 TAREA DE PRIORIDAD ALTA</h2>\n\n<div style=\"background-color: #ffebee; padding: 15px; border-left: 4px solid #d32f2f; margin: 10px 0;\">\n  <h3>{{ $json.task_title }}</h3>\n  <p><strong>ID de Tarea:</strong> {{ $json.task_id }}</p>\n  <p><strong>Descripción:</strong></p>\n  <p>{{ $json.task_description }}</p>\n</div>\n\n<p><strong>⏰ Clasificada:</strong> {{ $now.format('dd/MM/yyyy HH:mm:ss') }}</p>\n<p><strong>🤖 Prioridad detectada por:</strong> Google Gemini AI</p>\n\n<hr>\n<p style=\"color: #666; font-size: 12px;\"><em>Esta tarea requiere atención inmediata. Notificación automática generada por n8n.</em></p>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "prep-alta-id",
+      "name": "Preparar Email - ALTA",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "email-subject",
+              "name": "email_subject",
+              "value": "=⚠️ Tarea Prioridad MEDIA: {{ $json.task_title }}",
+              "type": "string"
+            },
+            {
+              "id": "email-body",
+              "name": "email_body",
+              "value": "=<h2 style=\"color: #f57c00;\">⚠️ TAREA DE PRIORIDAD MEDIA</h2>\n\n<div style=\"background-color: #fff3e0; padding: 15px; border-left: 4px solid #f57c00; margin: 10px 0;\">\n  <h3>{{ $json.task_title }}</h3>\n  <p><strong>ID de Tarea:</strong> {{ $json.task_id }}</p>\n  <p><strong>Descripción:</strong></p>\n  <p>{{ $json.task_description }}</p>\n</div>\n\n<p><strong>⏰ Clasificada:</strong> {{ $now.format('dd/MM/yyyy HH:mm:ss') }}</p>\n<p><strong>🤖 Prioridad detectada por:</strong> Google Gemini AI</p>\n\n<hr>\n<p style=\"color: #666; font-size: 12px;\"><em>Esta tarea debe ser revisada pronto. Notificación automática generada por n8n.</em></p>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "prep-media-id",
+      "name": "Preparar Email - MEDIA",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "email-subject",
+              "name": "email_subject",
+              "value": "=ℹ️ Tarea Prioridad BAJA: {{ $json.task_title }}",
+              "type": "string"
+            },
+            {
+              "id": "email-body",
+              "name": "email_body",
+              "value": "=<h2 style=\"color: #388e3c;\">ℹ️ TAREA DE PRIORIDAD BAJA</h2>\n\n<div style=\"background-color: #e8f5e9; padding: 15px; border-left: 4px solid #388e3c; margin: 10px 0;\">\n  <h3>{{ $json.task_title }}</h3>\n  <p><strong>ID de Tarea:</strong> {{ $json.task_id }}</p>\n  <p><strong>Descripción:</strong></p>\n  <p>{{ $json.task_description }}</p>\n</div>\n\n<p><strong>⏰ Clasificada:</strong> {{ $now.format('dd/MM/yyyy HH:mm:ss') }}</p>\n<p><strong>🤖 Prioridad detectada por:</strong> Google Gemini AI</p>\n\n<hr>\n<p style=\"color: #666; font-size: 12px;\"><em>Esta tarea puede ser atendida cuando haya tiempo disponible. Notificación automática generada por n8n.</em></p>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "prep-baja-id",
+      "name": "Preparar Email - BAJA",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "johan.eduardo.cala2002@gmail.com",
+        "subject": "={{ $json.email_subject }}",
+        "message": "={{ $json.email_body }}",
+        "options": {}
+      },
+      "id": "gmail-alta-id",
+      "name": "Gmail - Enviar ALTA",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        496,
+        48
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "C6ytAFeP00d6VUc1",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "johan.eduardo.cala2002@gmail.com",
+        "subject": "={{ $json.email_subject }}",
+        "message": "={{ $json.email_body }}",
+        "options": {}
+      },
+      "id": "gmail-media-id",
+      "name": "Gmail - Enviar MEDIA",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        496,
+        240
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "C6ytAFeP00d6VUc1",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "johan.eduardo.cala2002@gmail.com",
+        "subject": "={{ $json.email_subject }}",
+        "message": "={{ $json.email_body }}",
+        "options": {}
+      },
+      "id": "gmail-baja-id",
+      "name": "Gmail - Enviar BAJA",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        496,
+        432
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "C6ytAFeP00d6VUc1",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Preservar Datos + Extraer Prioridad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preservar Datos + Extraer Prioridad": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Preparar Email - ALTA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar Email - MEDIA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar Email - BAJA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Email - ALTA": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Enviar ALTA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Email - MEDIA": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Enviar MEDIA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Email - BAJA": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Enviar BAJA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "tags": []
+}

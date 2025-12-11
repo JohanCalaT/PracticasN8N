@@ -1,0 +1,438 @@
+{
+  "name": "Ejercicio 2 - Extracción de Entidades JSON",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "extraer-entidades",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger-id",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -880,
+        240
+      ],
+      "webhookId": "extraer-entidades-webhook"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.0-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Extrae las siguientes entidades del texto. Responde ÚNICAMENTE con un objeto JSON válido con las claves \"email_cliente\", \"tipo_problema\" (ej. \"error\", \"consulta\") y \"id_incidencia\". Si un valor no se encuentra, usa \"null\".\n\nIMPORTANTE: Tu respuesta debe ser SOLO el objeto JSON, sin texto adicional, sin markdown, sin comillas externas. Formato exacto:\n{\"email_cliente\": \"...\", \"tipo_problema\": \"...\", \"id_incidencia\": \"...\"}\n\nTexto: \"{{ $json.body.texto }}\""
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        240
+      ],
+      "id": "gemini-extract-id",
+      "name": "Gemini - Extraer Entidades",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "IXzNIt7jqHymadAq",
+          "name": "Gemini Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "texto-original",
+              "name": "texto_original",
+              "value": "={{ $('Webhook').item.json.body.texto }}",
+              "type": "string"
+            },
+            {
+              "id": "raw-json",
+              "name": "gemini_raw_response",
+              "value": "={{ $json.content.parts[0].text.trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "preserve-data-id",
+      "name": "Preservar Datos Originales",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -400,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "keep-original",
+              "name": "texto_original",
+              "value": "={{ $json.texto_original }}",
+              "type": "string"
+            },
+            {
+              "id": "parse-email",
+              "name": "email",
+              "value": "={{ JSON.parse($json.gemini_raw_response).email_cliente }}",
+              "type": "string"
+            },
+            {
+              "id": "parse-tipo",
+              "name": "tipo_problema",
+              "value": "={{ JSON.parse($json.gemini_raw_response).tipo_problema }}",
+              "type": "string"
+            },
+            {
+              "id": "parse-incidencia",
+              "name": "incidencia",
+              "value": "={{ JSON.parse($json.gemini_raw_response).id_incidencia }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "parse-json-id",
+      "name": "Edit Fields - Parsear JSON",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -160,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.email }}",
+                    "rightValue": "@ual.es",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains",
+                      "name": "filter.operator.contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Email UAL"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.email }}",
+                    "rightValue": "@gmail.com",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains",
+                      "name": "filter.operator.contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Email Gmail"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "switch-email-id",
+      "name": "Switch - Enrutar por Email",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        80,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response-ual",
+              "name": "respuesta",
+              "value": "=🎓 **INCIDENCIA UAL DETECTADA**\n\n📧 Email: {{ $json.email }}\n🏷️ Tipo: {{ $json.tipo_problema }}\n🆔 ID Incidencia: {{ $json.incidencia }}\n\n✅ Esta incidencia será procesada por el equipo de soporte de la UAL.\n\n📝 Texto original:\n{{ $json.texto_original }}",
+              "type": "string"
+            },
+            {
+              "id": "prioridad-ual",
+              "name": "prioridad",
+              "value": "alta",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-ual-id",
+      "name": "Formatear - UAL",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response-gmail",
+              "name": "respuesta",
+              "value": "=📧 **INCIDENCIA EXTERNA DETECTADA**\n\n📧 Email: {{ $json.email }}\n🏷️ Tipo: {{ $json.tipo_problema }}\n🆔 ID Incidencia: {{ $json.incidencia }}\n\n⚠️ Esta incidencia es de un usuario externo y será procesada según el protocolo estándar.\n\n📝 Texto original:\n{{ $json.texto_original }}",
+              "type": "string"
+            },
+            {
+              "id": "prioridad-gmail",
+              "name": "prioridad",
+              "value": "media",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-gmail-id",
+      "name": "Formatear - Gmail",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response-otros",
+              "name": "respuesta",
+              "value": "=❓ **INCIDENCIA DE DOMINIO DESCONOCIDO**\n\n📧 Email: {{ $json.email }}\n🏷️ Tipo: {{ $json.tipo_problema }}\n🆔 ID Incidencia: {{ $json.incidencia }}\n\n⚠️ El dominio del email no está en la lista de dominios conocidos. Requiere revisión manual.\n\n📝 Texto original:\n{{ $json.texto_original }}",
+              "type": "string"
+            },
+            {
+              "id": "prioridad-otros",
+              "name": "prioridad",
+              "value": "baja",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-otros-id",
+      "name": "Formatear - Otros",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"success\", \"entidades_extraidas\": { \"email\": $json.email, \"tipo_problema\": $json.tipo_problema, \"incidencia\": $json.incidencia, \"prioridad\": $json.prioridad }, \"respuesta\": $json.respuesta } }}",
+        "options": {}
+      },
+      "id": "response-ual-id",
+      "name": "Responder - UAL",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"success\", \"entidades_extraidas\": { \"email\": $json.email, \"tipo_problema\": $json.tipo_problema, \"incidencia\": $json.incidencia, \"prioridad\": $json.prioridad }, \"respuesta\": $json.respuesta } }}",
+        "options": {}
+      },
+      "id": "response-gmail-id",
+      "name": "Responder - Gmail",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"success\", \"entidades_extraidas\": { \"email\": $json.email, \"tipo_problema\": $json.tipo_problema, \"incidencia\": $json.incidencia, \"prioridad\": $json.prioridad }, \"respuesta\": $json.respuesta } }}",
+        "options": {}
+      },
+      "id": "response-otros-id",
+      "name": "Responder - Otros",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        400
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Gemini - Extraer Entidades",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini - Extraer Entidades": {
+      "main": [
+        [
+          {
+            "node": "Preservar Datos Originales",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preservar Datos Originales": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Parsear JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - Parsear JSON": {
+      "main": [
+        [
+          {
+            "node": "Switch - Enrutar por Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch - Enrutar por Email": {
+      "main": [
+        [
+          {
+            "node": "Formatear - UAL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Formatear - Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Formatear - Otros",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear - UAL": {
+      "main": [
+        [
+          {
+            "node": "Responder - UAL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear - Gmail": {
+      "main": [
+        [
+          {
+            "node": "Responder - Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear - Otros": {
+      "main": [
+        [
+          {
+            "node": "Responder - Otros",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "tags": []
+}

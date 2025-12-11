@@ -1,0 +1,378 @@
+{
+  "name": "Ejercicio 3 - Cadena de IA (AI Chain)",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        240
+      ],
+      "id": "manual-trigger-id",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-tema",
+              "name": "tema",
+              "value": "Integración de RabbitMQ en n8n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-tema-id",
+      "name": "Edit Fields - Definir Tema",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -960,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.0-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Genera 3 ideas creativas para un título de un artículo de blog sobre el tema: \"{{ $json.tema }}\".\n\nResponde ÚNICAMENTE con una lista de los 3 títulos separados por el carácter \"|\", sin numeración, sin viñetas, sin texto adicional.\n\nEjemplo de formato correcto:\nTítulo uno aquí | Título dos aquí | Título tres aquí"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        240
+      ],
+      "id": "gemini-brainstorm-id",
+      "name": "Gemini 1 - Brainstorm Títulos",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "IXzNIt7jqHymadAq",
+          "name": "Gemini Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "keep-tema",
+              "name": "tema_original",
+              "value": "={{ $('Edit Fields - Definir Tema').item.json.tema }}",
+              "type": "string"
+            },
+            {
+              "id": "extract-titles",
+              "name": "titulos_raw",
+              "value": "={{ $json.content.parts[0].text.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "split-titles",
+              "name": "titulos_array",
+              "value": "={{ $json.content.parts[0].text.trim().split('|').map(t => t.trim()) }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "split-titles-id",
+      "name": "Edit Fields - Split Títulos",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -480,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "titulos_array",
+        "options": {}
+      },
+      "id": "split-out-id",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "rename-titulo",
+              "name": "titulo",
+              "value": "={{ $json.titulos_array }}",
+              "type": "string"
+            },
+            {
+              "id": "keep-tema-original",
+              "name": "tema_original",
+              "value": "={{ $json.tema_original }}",
+              "type": "string"
+            },
+            {
+              "id": "add-index",
+              "name": "indice",
+              "value": "={{ $itemIndex + 1 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "prepare-for-gemini2-id",
+      "name": "Edit Fields - Preparar para Gemini 2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.0-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Escribe un párrafo de introducción atractivo (3-4 frases) para un artículo de blog con el siguiente título:\n\n\"{{ $json.titulo }}\"\n\nEl párrafo debe:\n- Captar la atención del lector\n- Explicar brevemente de qué trata el artículo\n- Generar interés por seguir leyendo\n\nResponde ÚNICAMENTE con el párrafo, sin el título, sin introducción adicional."
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.6
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        240,
+        240
+      ],
+      "id": "gemini-expand-id",
+      "name": "Gemini 2 - Expandir Introducción",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "IXzNIt7jqHymadAq",
+          "name": "Gemini Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "article-index",
+              "name": "numero_articulo",
+              "value": "={{ $json.indice }}",
+              "type": "number"
+            },
+            {
+              "id": "article-title",
+              "name": "titulo",
+              "value": "={{ $json.titulo }}",
+              "type": "string"
+            },
+            {
+              "id": "article-intro",
+              "name": "introduccion",
+              "value": "={{ $json.content.parts[0].text.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "original-tema",
+              "name": "tema_original",
+              "value": "={{ $json.tema_original }}",
+              "type": "string"
+            },
+            {
+              "id": "formatted-article",
+              "name": "articulo_formateado",
+              "value": "=## Artículo #{{ $json.indice }}\n\n### 📝 Título:\n**{{ $json.titulo }}**\n\n### 📖 Introducción:\n{{ $json.content.parts[0].text.trim() }}\n\n---",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-article-id",
+      "name": "Edit Fields - Formatear Artículo",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "merge-all-id",
+      "name": "Merge - Recopilar Todos",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        720,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Recopilar todos los artículos\nconst items = $input.all();\n\nconst tema = items[0].json.tema_original;\nconst articulos = items.map(item => ({\n  numero: item.json.numero_articulo,\n  titulo: item.json.titulo,\n  introduccion: item.json.introduccion,\n  formateado: item.json.articulo_formateado\n}));\n\n// Crear resumen completo\nconst resumen_completo = `\n🎯 CADENA DE IA - RESULTADOS\n${'='.repeat(50)}\n\n📚 Tema Original: \"${tema}\"\n📊 Total de Artículos Generados: ${articulos.length}\n\n${'='.repeat(50)}\n\n${articulos.map(art => art.formateado).join('\\n')}\n\n${'='.repeat(50)}\n\n✨ Proceso Completado:\n1️⃣ Gemini generó ${articulos.length} títulos creativos\n2️⃣ Cada título se expandió en una introducción\n3️⃣ Total de llamadas a IA: ${articulos.length + 1}\n`;\n\nreturn {\n  tema_original: tema,\n  total_articulos: articulos.length,\n  articulos: articulos,\n  resumen_completo: resumen_completo,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "code-summary-id",
+      "name": "Code - Generar Resumen Final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        240
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Definir Tema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - Definir Tema": {
+      "main": [
+        [
+          {
+            "node": "Gemini 1 - Brainstorm Títulos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 1 - Brainstorm Títulos": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Split Títulos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - Split Títulos": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Preparar para Gemini 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - Preparar para Gemini 2": {
+      "main": [
+        [
+          {
+            "node": "Gemini 2 - Expandir Introducción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2 - Expandir Introducción": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - Formatear Artículo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - Formatear Artículo": {
+      "main": [
+        [
+          {
+            "node": "Merge - Recopilar Todos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge - Recopilar Todos": {
+      "main": [
+        [
+          {
+            "node": "Code - Generar Resumen Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f274780af13e121d3b4751773ae9b5f211d08f1feeaa868494d2616c166358b"
+  },
+  "tags": []
+}

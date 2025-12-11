@@ -1,0 +1,101 @@
+{
+  "name": "P8 - Ejercicio 1: PostgreSQL + RabbitMQ (Refactorizado)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "cc371f4f-e0cf-4308-af5b-c14b12fd34c0",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "name"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tasks",
+          "mode": "raw"
+        },
+        "options": {}
+      },
+      "id": "592118ed-b77d-45d4-bf12-9ef8093ac330",
+      "name": "PostgreSQL - Select",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        240,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "refactorizado-postgres",
+          "name": "PostgreSQL (Refactorizado)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "queue": "={{ $env.RABBITMQ_QUEUE_NAME }}",
+        "options": {}
+      },
+      "id": "fbd6fdc7-43a8-4a57-9ec0-1ab09f6f40f3",
+      "name": "RabbitMQ - Send",
+      "type": "n8n-nodes-base.rabbitmq",
+      "typeVersion": 1,
+      "position": [
+        480,
+        0
+      ],
+      "credentials": {
+        "rabbitmq": {
+          "id": "refactorizado-rabbitmq",
+          "name": "RabbitMQ (Refactorizado)"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Select",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Select": {
+      "main": [
+        [
+          {
+            "node": "RabbitMQ - Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "refactorizado-p8-ejercicio1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
+

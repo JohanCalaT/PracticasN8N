@@ -1,0 +1,113 @@
+# ========================================
+# GitHub Actions - CI/CD Pipeline para n8n
+# Práctica 8: DevOps y GitOps
+# ========================================
+# Este workflow despliega automáticamente los flujos de trabajo de n8n
+# cuando se hace push a la rama main y se modifican archivos .json en workflows/
+
+name: Deploy n8n Workflows
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'practica-08/workflows/*.json'  # Solo se ejecuta si cambian los workflows
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    
+    steps:
+      # ========================================
+      # Paso 1: Checkout del repositorio
+      # ========================================
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Obtener todo el historial para comparaciones
+
+      # ========================================
+      # Paso 2: Setup de Node.js
+      # ========================================
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      # ========================================
+      # Paso 3: Instalar n8n-cli
+      # ========================================
+      - name: Install n8n-cli
+        run: npm install n8n -g
+
+      # ========================================
+      # Paso 4: Verificar archivos modificados
+      # ========================================
+      - name: Get changed workflow files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            practica-08/workflows/*.json
+
+      # ========================================
+      # Paso 5: Desplegar workflows a producción
+      # ========================================
+      - name: Deploy workflows to n8n
+        if: steps.changed-files.outputs.any_changed == 'true'
+        env:
+          N8N_HOST: ${{ secrets.N8N_PROD_HOST }}
+          N8N_API_KEY: ${{ secrets.N8N_PROD_API_KEY }}
+        run: |
+          echo "🚀 Desplegando workflows modificados..."
+          
+          # Iterar sobre cada archivo modificado
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "📦 Desplegando: $file"
+            
+            # Importar el workflow (esto creará uno nuevo o actualizará uno existente)
+            n8n import:workflow --input="$file"
+            
+            echo "✅ Desplegado: $file"
+          done
+          
+          echo "🎉 Despliegue completado exitosamente"
+
+      # ========================================
+      # Paso 6: Notificación de éxito
+      # ========================================
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "### ✅ Despliegue Exitoso" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflows desplegados:**" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Entorno:** Producción" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+
+      # ========================================
+      # Paso 7: Notificación de error
+      # ========================================
+      - name: Deployment failed
+        if: failure()
+        run: |
+          echo "### ❌ Despliegue Fallido" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Error:** El despliegue ha fallado. Revise los logs." >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          exit 1
+
+# ========================================
+# CONFIGURACIÓN REQUERIDA EN GITHUB:
+# ========================================
+# 1. Ir a Settings > Secrets and variables > Actions
+# 2. Crear los siguientes secrets:
+#    - N8N_PROD_HOST: URL de la instancia de n8n (ej: http://n8n.produccion.com)
+#    - N8N_PROD_API_KEY: API Key generada en n8n (Settings > API)
+# ========================================
+

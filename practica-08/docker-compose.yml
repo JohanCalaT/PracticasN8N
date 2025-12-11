@@ -1,0 +1,52 @@
+# Docker Compose para n8n - Práctica 8: DevOps y GitOps
+# Integración de Tecnologías y Servicios Informáticos
+# Universidad de Almería
+
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n
+    container_name: n8n-practica-08
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    volumes:
+      - ./n8n-data:/home/node/.n8n
+    env_file:
+      - ./.env
+    networks:
+      - task-network
+    environment:
+      # Configuración básica de n8n
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
+      - GENERIC_TIMEZONE=Europe/Madrid
+      - TZ=Europe/Madrid
+      
+      # Variables de entorno para workflows - Google Sheets (Práctica 3)
+      - SHEET_ID_CHISTES=${SHEET_ID_CHISTES}
+      - SHEET_NAME_PROG=${SHEET_NAME_PROG}
+      - SHEET_NAME_MISC=${SHEET_NAME_MISC}
+      - SHEET_NAME_DARK=${SHEET_NAME_DARK}
+      
+      # Variables de entorno para workflows - PostgreSQL (Práctica 6)
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      
+      # Variables de entorno para workflows - RabbitMQ (Práctica 6)
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASS=${RABBITMQ_PASS}
+      - RABBITMQ_QUEUE_NAME=${RABBITMQ_QUEUE_NAME}
+
+networks:
+  task-network:
+    name: task-manager-system_default
+    external: true
+
